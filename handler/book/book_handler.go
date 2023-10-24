@@ -22,8 +22,24 @@ func GetBooks(w http.ResponseWriter, r *http.Request, BookRepository *books.Book
 }
 
 func GetBookById(w http.ResponseWriter, r *http.Request, BookRepository *books.BookRepository) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"message":"Book Management Detail", "develop" : true}`))
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	if id == "" {
+		utils.JsonResponse(w, nil, "Id cannot empty", http.StatusBadRequest)
+		return
+	}
+
+	books, err := BookRepository.FindBookById(id)
+
+	if err != nil {
+		log.Println("error", err.Error())
+		utils.JsonResponse(w, nil, "ERROR", http.StatusInternalServerError)
+		return
+	}
+
+	utils.JsonResponse(w, books, "Books Detail", http.StatusOK)
 }
 
 func CreateBook(w http.ResponseWriter, r *http.Request, BookRepository *books.BookRepository) {

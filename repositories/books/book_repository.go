@@ -77,6 +77,39 @@ func (r BookRepository) GetAllBooks() ([]Book, error) {
 	return books, nil
 }
 
+func (r BookRepository) FindBookById(id string) (*Book, error) {
+	query := `SELECT
+			books.id,
+			books.book_code,
+			books.title,
+			books.description,
+			books.page,
+			books.author_id,
+			CONCAT(authors.first_name, ' ', authors.last_name) as author_name
+		FROM
+			books
+		JOIN authors ON
+			books.author_id = authors.id
+		WHERE books.id = ?`
+	row := r.db.QueryRow(query, id)
+
+	var book Book
+
+	err := row.Scan(&book.ID,
+		&book.BookCode,
+		&book.Title,
+		&book.Description,
+		&book.Page,
+		&book.AuthorID,
+		&book.AuthorName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &book, err
+}
+
 func (r *BookRepository) Create(payload *book_entity.Book) error {
 	query := `
 		INSERT INTO books 

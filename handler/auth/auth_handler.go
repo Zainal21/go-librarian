@@ -79,8 +79,17 @@ func Register(w http.ResponseWriter, r *http.Request, UserRepository *users.User
 }
 
 func Login(w http.ResponseWriter, r *http.Request, UserRepository *users.UserRepository) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	var request LoginRequest
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&request)
+
+	if err != nil {
+		utils.JsonResponse(w, nil, "failed resource", http.StatusBadRequest)
+	}
+
+	username := request.Username
+	password := request.Password
 
 	// fetch user from repository
 	user, err := UserRepository.FindUserByUserName(username)

@@ -81,7 +81,7 @@ func GetBookById(w http.ResponseWriter, r *http.Request, BookRepository *books.B
 	}
 
 	books, err := BookRepository.FindBookById(id)
-
+	log.Println("books : ", books)
 	if err != nil {
 		log.Println("error", err.Error())
 		utils.JsonResponse(w, nil, "NOT FOUND", http.StatusNotFound)

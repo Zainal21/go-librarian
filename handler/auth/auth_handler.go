@@ -15,12 +15,6 @@ type UserRegisterPayload struct {
 	Email    string
 }
 
-type LoginResponse struct {
-	Username string
-	Email    string
-	Token    string
-}
-
 const (
 	ErrRequiredFields     = "All fields are required"
 	ErrPasswordNotMatch   = "Password & Confirm password doesn't match"
@@ -102,10 +96,13 @@ func Login(w http.ResponseWriter, r *http.Request, UserRepository *users.UserRep
 	}
 
 	var response = LoginResponse{
-		Email:    user.Email,
-		Username: user.Username,
-		Token:    token,
+		Id:        user.Id,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Token:     &token,
 	}
 
-	utils.JsonResponse(w, response, "New user register successfully", http.StatusCreated)
+	utils.JsonResponse(w, response, "Login success", http.StatusCreated)
 }

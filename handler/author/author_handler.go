@@ -66,7 +66,23 @@ func GetAuthors(w http.ResponseWriter, r *http.Request, AuthorRepository *author
 		return
 	}
 
-	utils.JsonResponse(w, authors, "SUCCESS", http.StatusOK)
+	var authorResponses []AuthorResponse
+	for _, author := range authors {
+		authorResponses = append(authorResponses, MapAuthorToResponse(&author))
+	}
+
+	utils.JsonResponse(w, authorResponses, "SUCCESS", http.StatusOK)
+}
+
+func MapAuthorToResponse(author *author_entity.Author) AuthorResponse {
+	return AuthorResponse{
+		Id:        author.Id,
+		FirstName: author.FirstName,
+		LastName:  author.LastName,
+		Age:       author.Age,
+		CreatedAt: author.CreatedAt,
+		UpdatedAt: author.UpdatedAt,
+	}
 }
 
 func GetAuthorById(w http.ResponseWriter, r *http.Request, AuthorRepository *authors.AuthorRepository) {
@@ -80,7 +96,14 @@ func GetAuthorById(w http.ResponseWriter, r *http.Request, AuthorRepository *aut
 		return
 	}
 
-	utils.JsonResponse(w, authors, "Detail Author", http.StatusOK)
+	utils.JsonResponse(w, AuthorResponse{
+		Id:        authors.Id,
+		FirstName: authors.FirstName,
+		LastName:  authors.LastName,
+		Age:       authors.Age,
+		CreatedAt: authors.Id,
+		UpdatedAt: authors.Id,
+	}, "Detail Author", http.StatusOK)
 }
 
 func CreateAuthor(w http.ResponseWriter, r *http.Request, AuthorRepository *authors.AuthorRepository) {

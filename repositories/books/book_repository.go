@@ -14,13 +14,15 @@ type BookRepository struct {
 }
 
 type Book struct {
-	ID          string
-	BookCode    string
-	Title       string
-	Description string
-	Page        int
-	AuthorID    string
-	AuthorName  string
+	Id          *string `json:"id"`
+	BookCode    string  `json:"book_code"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Page        int     `json:"page"`
+	AuthorName  string  `json:"author_name"`
+	AuthorId    string  `json:"author_id"`
+	CreatedAt   *string `json:"created_at"`
+	UpdatedAt   *string `json:"updated_at"`
 }
 
 func NewBookRepository(db *sql.DB) *BookRepository {
@@ -37,6 +39,8 @@ func (r BookRepository) GetAllBooks() ([]Book, error) {
         books.description,
         books.page,
         books.author_id,
+		books.created_at,
+		books.updated_at,
         CONCAT(authors.first_name, ' ', authors.last_name) as author_name
     FROM
         books
@@ -57,13 +61,15 @@ func (r BookRepository) GetAllBooks() ([]Book, error) {
 		var book Book
 		var authorName string // Define a variable for author name
 		if err := rows.Scan(
-			&book.ID,
+			&book.Id,
 			&book.BookCode,
 			&book.Title,
 			&book.Description,
 			&book.Page,
-			&book.AuthorID,
+			&book.AuthorId,
 			&authorName, // Scan author name into a variable
+			&book.CreatedAt,
+			&book.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -86,6 +92,8 @@ func (r BookRepository) FindBookById(id string) (*Book, error) {
 			books.description,
 			books.page,
 			books.author_id,
+			books.created_at,
+			books.updated_at,
 			CONCAT(authors.first_name, ' ', authors.last_name) as author_name
 		FROM
 			books
@@ -96,13 +104,16 @@ func (r BookRepository) FindBookById(id string) (*Book, error) {
 
 	var book Book
 
-	err := row.Scan(&book.ID,
+	err := row.Scan(&book.Id,
 		&book.BookCode,
 		&book.Title,
 		&book.Description,
 		&book.Page,
-		&book.AuthorID,
-		&book.AuthorName)
+		&book.AuthorId,
+		&book.AuthorName,
+		&book.CreatedAt,
+		&book.UpdatedAt,
+	)
 
 	if err != nil {
 		return nil, err

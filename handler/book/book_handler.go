@@ -1,6 +1,7 @@
 package book
 
 import (
+	"encoding/json"
 	"errors"
 	"go-book-management/entities/book_entity"
 	"go-book-management/repositories/books"
@@ -28,10 +29,18 @@ const (
 )
 
 func parseBookPayload(r *http.Request) (BookPayload, error) {
-	title := r.FormValue("title")
-	author_id := r.FormValue("author_id")
-	description := r.FormValue("description")
-	page := r.FormValue("age")
+	var request BookRequest
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&request)
+	if err != nil {
+		return BookPayload{}, errors.New(ErrBookCreationFailed)
+	}
+
+	title := request.Title
+	author_id := request.AuthorId
+	description := request.Description
+	page := request.Page
 
 	if title == "" || author_id == "" || description == "" || page == "" {
 		return BookPayload{}, errors.New(ErrRequiredFields)

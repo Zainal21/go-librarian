@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"encoding/json"
 	"errors"
 	"go-book-management/entities/user_entity"
 	"go-book-management/repositories/users"
@@ -20,21 +21,29 @@ const (
 	ErrPasswordNotMatch   = "Password & Confirm password doesn't match"
 	ErrInvalidAgeFormat   = "Invalid age format"
 	ErrUserIDEmpty        = "ID cannot be empty"
-	ErrUserCreationFailed = "User creation failed"
+	ErrUserCreationFailed = "User register failed"
 	ErrUserUpdateFailed   = "User update failed"
 )
 
 func parseUserRegisterPayload(r *http.Request) (UserRegisterPayload, error) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-	password_confirm := r.FormValue("password_confirm")
-	email := r.FormValue("email")
+	var request RegisterRequest
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&request)
+	if err != nil {
+		return UserRegisterPayload{}, errors.New(ErrUserCreationFailed)
+	}
+
+	username := request.Username
+	email := request.Email
+	password := request.Password
+	passwordConfirm := request.PasswordConfirm
 
 	if username == "" || password == "" || email == "" {
 		return UserRegisterPayload{}, errors.New(ErrRequiredFields)
 	}
 
-	if password != password_confirm {
+	if password != passwordConfirm {
 		return UserRegisterPayload{}, errors.New(ErrPasswordNotMatch)
 	}
 

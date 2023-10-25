@@ -1,6 +1,7 @@
 package author
 
 import (
+	"encoding/json"
 	"errors"
 	"go-book-management/entities/author_entity"
 	"go-book-management/repositories/authors"
@@ -35,9 +36,16 @@ func parseInt(value string) (int, error) {
 }
 
 func parseAuthorPayload(r *http.Request) (AuthorPayload, error) {
-	firstName := r.FormValue("first_name")
-	lastName := r.FormValue("last_name")
-	ageStr := r.FormValue("age")
+	var request AuthorRequest
+	firstName := request.FirstName
+	lastName := request.LastName
+	ageStr := request.Age
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&request)
+	if err != nil {
+		return AuthorPayload{}, errors.New(ErrAuthorCreationFailed)
+	}
 
 	if firstName == "" || lastName == "" || ageStr == "" {
 		return AuthorPayload{}, errors.New(ErrRequiredFields)

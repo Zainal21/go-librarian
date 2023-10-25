@@ -18,7 +18,7 @@ func JsonResponse(w http.ResponseWriter, data interface{}, message string, statu
 		Data:      data,
 		Message:   message,
 		Status:    status,
-		Timestamp: time.Now().Local().String(),
+		Timestamp: time.Now().Format(time.RFC3339),
 	}
 
 	jsonResponse, err := json.Marshal(response)

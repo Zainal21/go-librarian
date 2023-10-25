@@ -47,6 +47,7 @@ func (r BookRepository) GetAllBooks() ([]Book, error) {
     JOIN authors ON
         books.author_id = authors.id`
 
+	log.Println("Book selected : ", query)
 	rows, err := r.db.Query(query)
 
 	if err != nil {
@@ -100,6 +101,8 @@ func (r BookRepository) FindBookById(id string) (*Book, error) {
 		JOIN authors ON
 			books.author_id = authors.id
 		WHERE books.id = ?`
+	log.Println("Book find by id : ", query)
+
 	row := r.db.QueryRow(query, id)
 
 	var book Book

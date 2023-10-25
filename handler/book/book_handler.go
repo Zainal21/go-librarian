@@ -121,7 +121,7 @@ func CreateBook(w http.ResponseWriter, r *http.Request, BookRepository *books.Bo
 		utils.JsonResponse(w, nil, err.Error(), http.StatusBadRequest)
 		return
 	}
-	utils.JsonResponse(w, 1, "SUCCESS", http.StatusCreated)
+	utils.JsonResponse(w, 1, "Book created successfully", http.StatusCreated)
 }
 
 func UpdateBook(w http.ResponseWriter, r *http.Request, BookRepository *books.BookRepository) {
@@ -154,7 +154,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request, BookRepository *books.Bo
 		return
 	}
 
-	utils.JsonResponse(w, 1, "SUCCESS", http.StatusOK)
+	utils.JsonResponse(w, 1, "Book updated successfully", http.StatusOK)
 }
 
 func DeleteBook(w http.ResponseWriter, r *http.Request, BookRepository *books.BookRepository) {

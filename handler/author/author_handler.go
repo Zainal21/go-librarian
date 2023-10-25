@@ -79,7 +79,7 @@ func GetAuthors(w http.ResponseWriter, r *http.Request, AuthorRepository *author
 		authorResponses = append(authorResponses, MapAuthorToResponse(&author))
 	}
 
-	utils.JsonResponse(w, authorResponses, "SUCCESS", http.StatusOK)
+	utils.JsonResponse(w, authorResponses, "get all authors", http.StatusOK)
 }
 
 func MapAuthorToResponse(author *author_entity.Author) AuthorResponse {

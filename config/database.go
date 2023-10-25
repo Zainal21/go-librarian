@@ -17,7 +17,7 @@ func DbConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// create migration table authors
+	// // create migration table authors
 	// _, err = db.Exec(`CREATE TABLE IF NOT EXISTS authors (
 	// 		id char(36) PRIMARY KEY,
 	// 		first_name VARCHAR(50) NOT NULL,
@@ -35,7 +35,7 @@ func DbConnection() (*sql.DB, error) {
 	// 		title VARCHAR(64) NOT NULL,
 	// 		description VARCHAR(64) NOT NULL,
 	// 		page INT NOT NULL DEFAULT 1,
-	// 		author_id INT,
+	// 		author_id char(36),
 	// 		created_at TIMESTAMP  NULL,
 	// 		updated_at TIMESTAMP  NULL
 	// 	);
@@ -48,9 +48,8 @@ func DbConnection() (*sql.DB, error) {
 
 	// log.Println("Database migration completed successfully.")
 
-	// seeder database
+	// // seeder database
 
-	// Sample user data
 	// authors := []struct {
 	// 	first_name string
 	// 	last_name  string

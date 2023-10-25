@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"go-book-management/entities/book_entity"
+	"log"
 	"strconv"
 	"time"
 )
@@ -13,12 +14,12 @@ type BookRepository struct {
 }
 
 type Book struct {
-	ID          int
+	ID          string
 	BookCode    string
 	Title       string
 	Description string
 	Page        int
-	AuthorID    int
+	AuthorID    string
 	AuthorName  string
 }
 
@@ -115,16 +116,18 @@ func (r *BookRepository) Create(payload *book_entity.Book) error {
 		INSERT INTO books 
 			(id, book_code, title, description, page, author_id, created_at, updated_at) 
 		VALUES 
-			(UUID(), ?, ? , ? , ? , ? , ?)`
+			(UUID(), ?, ? , ? , ? , ? , ?, ?)`
 
 	bookCode, err := r.GenerateUniqueBookCode()
 
 	if err != nil {
+		log.Println("Generate Book Code : ", err)
 		return err
 	}
 
-	_, err = r.db.Exec(query, bookCode, payload.Title, payload.Description, payload.Page, payload.AuthorId)
+	_, err = r.db.Exec(query, bookCode, payload.Title, payload.Description, payload.Page, payload.AuthorId, time.Now(), time.Now())
 	if err != nil {
+		log.Println("Execute query : ", err)
 		return err
 	}
 
@@ -172,20 +175,18 @@ func (r *BookRepository) GenerateUniqueBookCode() (string, error) {
 
 	// Query the database to find the highest value of the last 4 characters in book_code
 	query := `
-        SELECT MAX(CAST(RIGHT(book_code, 4) AS SIGNED)) AS last_order
+        SELECT COALESCE(MAX(CAST(RIGHT(book_code, 4) AS SIGNED)), 0000) AS last_order
         FROM books
         WHERE MONTH(created_at) = ? AND YEAR(created_at) = ?
     `
 	err := r.db.QueryRow(query, month, year).Scan(&lastOrder)
 	if err != nil {
-		return "", err
-	}
-
-	if err != nil {
+		fmt.Println("Error:", err)
 		return "", err
 	}
 
 	lastOrderInt, err := strconv.Atoi(lastOrder)
+
 	if err != nil {
 		// Handle the error if the conversion fails
 		fmt.Println("Error:", err)
@@ -194,10 +195,8 @@ func (r *BookRepository) GenerateUniqueBookCode() (string, error) {
 
 	// Calculate the next ordered value
 	nextOrdered := lastOrderInt + 1
-
 	// Generate the unique code
 	uniqueCode := fmt.Sprintf("BOOK%s%s%04d", month, yearFormat, nextOrdered)
-
 	return uniqueCode, nil
 }
 

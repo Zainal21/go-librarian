@@ -1,1 +1,111 @@
 package auth
+
+import (
+	"errors"
+	"go-book-management/entities/user_entity"
+	"go-book-management/repositories/users"
+	"go-book-management/utils"
+	"log"
+	"net/http"
+)
+
+type UserRegisterPayload struct {
+	Username string
+	Password string
+	Email    string
+}
+
+type LoginResponse struct {
+	Username string
+	Email    string
+	Token    string
+}
+
+const (
+	ErrRequiredFields     = "All fields are required"
+	ErrPasswordNotMatch   = "Password & Confirm password doesn't match"
+	ErrInvalidAgeFormat   = "Invalid age format"
+	ErrUserIDEmpty        = "ID cannot be empty"
+	ErrUserCreationFailed = "User creation failed"
+	ErrUserUpdateFailed   = "User update failed"
+)
+
+func parseUserRegisterPayload(r *http.Request) (UserRegisterPayload, error) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+	password_confirm := r.FormValue("password_confirm")
+	email := r.FormValue("email")
+
+	if username == "" || password == "" || email == "" {
+		return UserRegisterPayload{}, errors.New(ErrRequiredFields)
+	}
+
+	if password != password_confirm {
+		return UserRegisterPayload{}, errors.New(ErrPasswordNotMatch)
+	}
+
+	return UserRegisterPayload{
+		Username: username,
+		Password: password,
+		Email:    email,
+	}, nil
+
+}
+
+func Register(w http.ResponseWriter, r *http.Request, UserRepository *users.UserRepository) {
+	data, err := parseUserRegisterPayload(r)
+
+	if err != nil {
+		utils.JsonResponse(w, nil, err.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	var payload user_entity.User
+	payload.Email = data.Email
+	payload.Password = data.Password
+	payload.Username = data.Username
+
+	err = UserRepository.Register(&payload)
+
+	if err != nil {
+		utils.JsonResponse(w, nil, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	utils.JsonResponse(w, 1, "New user register successfully", http.StatusCreated)
+}
+
+func Login(w http.ResponseWriter, r *http.Request, UserRepository *users.UserRepository) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	// fetch user from repository
+	user, err := UserRepository.FindUserByUserName(username)
+
+	if err != nil || !UserRepository.VerifyPassword(username, password) {
+		log.Println(err.Error())
+		utils.JsonResponse(w, nil, "Wrong Password", http.StatusUnprocessableEntity)
+		return
+	}
+
+	// generate token
+	token, err := utils.GenerateToken(username)
+
+	if err != nil {
+		utils.JsonResponse(w, nil, "Error Generate token", http.StatusInternalServerError)
+		return
+	}
+
+	if token == "" {
+		utils.JsonResponse(w, nil, "Generate Token  is empty", http.StatusInternalServerError)
+		return
+	}
+
+	var response = LoginResponse{
+		Email:    user.Email,
+		Username: user.Username,
+		Token:    token,
+	}
+
+	utils.JsonResponse(w, response, "New user register successfully", http.StatusCreated)
+}

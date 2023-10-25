@@ -43,5 +43,19 @@ func CreateTable() {
 		log.Println("err : " + err.Error())
 	}
 
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
+			id char(36) PRIMARY KEY,
+			username VARCHAR(50) NOT NULL,
+			password VARCHAR(64) NOT NULL,
+			email VARCHAR(64) NOT NULL,
+			created_at TIMESTAMP  NULL,
+			updated_at TIMESTAMP  NULL
+		);
+	`)
+
+	if err != nil {
+		log.Println("err : " + err.Error())
+	}
+
 	log.Println("Database migration completed successfully.")
 }
